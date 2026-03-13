@@ -94,6 +94,7 @@
         'Set-AwtrixMoodlight'
         'Set-AwtrixPower'
         'Set-AwtrixSetting'
+        'Show-AwtrixScreen'
         'Start-AwtrixSleep'
         'Switch-AwtrixApp'
         'Update-AwtrixFirmware'
