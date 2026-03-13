@@ -5,7 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.1.0] Unreleased
+## [0.2.0] 2026-03-13
+
+### Added
+
+- `Show-AwtrixScreen` — Render the current AWTRIX screen as colored pixels in the terminal using PwshSpectreConsole Canvas
+- `AwtrixColor` enum — Named colors (Red, Green, Blue, Yellow, Cyan, Magenta, White, Black, Orange, Purple, Pink) for intuitive color selection
+- `AwtrixIndicatorPosition` enum — Descriptive indicator positions (Top, Middle, Bottom) instead of numeric IDs
+- `AwtrixColorTransformAttribute` — Custom transform attribute for automatic color conversion across all color parameters
+- Type accelerators for `AwtrixColor`, `AwtrixIndicatorPosition`, and `AwtrixColorTransformAttribute`
+
+### Changed
+
+- **Indicator Naming**: Replaced numeric indicator IDs (1, 2, 3) with descriptive enum values:
+  - `-Id 1` → `-Position Top` (upper right corner)
+  - `-Id 2` → `-Position Middle` (right side)
+  - `-Id 3` → `-Position Bottom` (lower right corner)
+- **Time Parameter UX**: All time-based parameters now have explicit units in their names:
+  - `-Blink` → `-BlinkMilliseconds` (alias `-BlinkMs`)
+  - `-Fade` → `-FadeMilliseconds` (alias `-FadeMs`)
+  - `-BlinkText` → `-BlinkTextMilliseconds` (alias `-BlinkTextMs`)
+  - `-FadeText` → `-FadeTextMilliseconds` (alias `-FadeTextMs`)
+  - `-Duration` → `-DurationSeconds` (alias `-DurationSec`)
+  - `-Lifetime` → `-LifetimeSeconds` (alias `-LifetimeSec`)
+- **Color Parameter Handling**: All color parameters now accept named colors via `AwtrixColor` enum, with automatic conversion to hex or RGB arrays
+- **Module Loading Order**: Classes now load before functions to ensure transform attributes are available at parse time
+- **Test Infrastructure**: Updated all Pester tests to import from built module output via build environment variables for consistency with deployment
+- **Payload Mapping**: Updated `NewAppPayload` parameter mapping to use renamed parameter names
+
+## [0.1.0] 2026-03-13
 
 ### Added
 
