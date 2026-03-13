@@ -5,53 +5,64 @@ online version:
 schema: 2.0.0
 ---
 
-# Clear-AwtrixIndicator
+# Show-AwtrixScreen
 
 ## SYNOPSIS
-Clears a colored indicator on the AWTRIX display.
+Renders the current AWTRIX screen as colored pixels in the terminal.
 
 ## SYNTAX
 
 ```
-Clear-AwtrixIndicator [-Position] <AwtrixIndicatorPosition> [-BaseUri <String>]
+Show-AwtrixScreen [[-ScreenData] <Int32[]>] [[-BaseUri] <String>] [[-PixelSize] <Int32>]
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Hides one of the three colored indicators on the AWTRIX 3 display
-by sending an empty payload to the indicator endpoint.
+Fetches the current 32x8 matrix screen from the AWTRIX device and renders
+it in the terminal using Spectre.Console's Canvas via PwshSpectreConsole.
+Each LED pixel is displayed as a colored block, scaled up for visibility.
+
+Requires the PwshSpectreConsole module to be installed:
+    Install-Module PwshSpectreConsole
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Clear-AwtrixIndicator -Id 1
+Show-AwtrixScreen
 ```
 
-Clears indicator 1 (upper right corner).
+Fetches and renders the current screen content.
 
 ### EXAMPLE 2
 ```
-1..3 | ForEach-Object { Clear-AwtrixIndicator -Id $_ }
+Get-AwtrixScreen | Show-AwtrixScreen -PixelSize 3
 ```
 
-Clears all three indicators.
+Pipes screen data and renders at 3x scale.
+
+### EXAMPLE 3
+```
+Show-AwtrixScreen -BaseUri 'http://192.168.1.100'
+```
+
+Renders screen from a specific device.
 
 ## PARAMETERS
 
-### -Position
-The indicator position to clear: Top (upper right), Middle (right side), or Bottom (lower right).
+### -ScreenData
+Optional pre-fetched screen data (array of 256 24-bit color integers).
+If not provided, the function calls Get-AwtrixScreen to fetch live data.
 
 ```yaml
-Type: AwtrixIndicatorPosition
+Type: Int32[]
 Parameter Sets: (All)
 Aliases:
-Accepted values: Top, Middle, Bottom
 
-Required: True
+Required: False
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
@@ -65,8 +76,25 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 2
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -PixelSize
+Scale factor for each pixel.
+Default is 2, meaning each LED pixel maps to
+a 2x2 block on the canvas for better visibility.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: 2
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

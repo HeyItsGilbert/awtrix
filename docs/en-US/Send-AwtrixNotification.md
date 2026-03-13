@@ -14,13 +14,13 @@ Sends a one-time notification to the AWTRIX device.
 
 ```
 Send-AwtrixNotification [[-Text] <Object>] [-TextCase <Int32>] [-TopText] [-TextOffset <Int32>] [-Center]
- [-Color <Object>] [-Gradient <Array>] [-BlinkText <Int32>] [-FadeText <Int32>] [-Background <Object>]
- [-Rainbow] [-Icon <String>] [-PushIcon <Int32>] [-Repeat <Int32>] [-Duration <Int32>] [-Hold]
- [-Sound <String>] [-Rtttl <String>] [-LoopSound] [-Stack] [-Wakeup] [-Clients <String[]>] [-NoScroll]
- [-ScrollSpeed <Int32>] [-Effect <String>] [-EffectSettings <Hashtable>] [-Bar <Int32[]>] [-Line <Int32[]>]
- [-Autoscale] [-BarBackgroundColor <Object>] [-Progress <Int32>] [-ProgressColor <Object>]
- [-ProgressBackgroundColor <Object>] [-Draw <Array>] [-Overlay <String>] [-BaseUri <String>]
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+ [-Color <Object>] [-Gradient <Array>] [-BlinkTextMilliseconds <Int32>] [-FadeTextMilliseconds <Int32>]
+ [-Background <Object>] [-Rainbow] [-Icon <String>] [-PushIcon <Int32>] [-Repeat <Int32>]
+ [-DurationSeconds <Int32>] [-Hold] [-Sound <String>] [-Rtttl <String>] [-LoopSound] [-Stack] [-Wakeup]
+ [-Clients <String[]>] [-NoScroll] [-ScrollSpeed <Int32>] [-Effect <String>] [-EffectSettings <Hashtable>]
+ [-Bar <Int32[]>] [-Line <Int32[]>] [-Autoscale] [-BarBackgroundColor <Object>] [-Progress <Int32>]
+ [-ProgressColor <Object>] [-ProgressBackgroundColor <Object>] [-Draw <Array>] [-Overlay <String>]
+ [-BaseUri <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -174,14 +174,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -BlinkText
-Blinks the text at the given interval in milliseconds.
-Not compatible with gradient or rainbow.
+### -BlinkTextMilliseconds
+Blinks the text at the given interval in milliseconds. Not compatible with gradient or rainbow.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: BlinkTextMs
 
 Required: False
 Position: Named
@@ -190,14 +189,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -FadeText
-Fades the text on and off at the given interval in milliseconds.
-Not compatible with gradient or rainbow.
+### -FadeTextMilliseconds
+Fades the text on and off at the given interval in milliseconds. Not compatible with gradient or rainbow.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: FadeTextMs
 
 Required: False
 Position: Named
@@ -283,13 +281,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Duration
+### -DurationSeconds
 How long the notification is displayed in seconds.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: DurationSec
 
 Required: False
 Position: Named

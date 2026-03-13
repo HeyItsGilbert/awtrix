@@ -1,10 +1,11 @@
 # Module-scoped connection state
 $script:AwtrixConnection = $null
 
-# Dot source public/private functions
+# Dot source class definitions first (enums, transform attributes), then public/private functions
+$classes = @(Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Class/*.ps1')   -Recurse -ErrorAction Stop)
 $public = @(Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Public/*.ps1')  -Recurse -ErrorAction Stop)
 $private = @(Get-ChildItem -Path (Join-Path -Path $PSScriptRoot -ChildPath 'Private/*.ps1') -Recurse -ErrorAction Stop)
-foreach ($import in @($public + $private)) {
+foreach ($import in @($classes + $public + $private)) {
     try {
         . $import.FullName
     } catch {
@@ -13,3 +14,42 @@ foreach ($import in @($public + $private)) {
 }
 
 Export-ModuleMember -Function $public.Basename
+
+# Define the types to export with type accelerators.
+$ExportableTypes = @(
+    [AwtrixColor],
+    [AwtrixIndicatorPosition],
+    [AwtrixColorTransformAttribute]
+)
+# Get the internal TypeAccelerators class to use its static methods.
+$TypeAcceleratorsClass = [psobject].Assembly.GetType(
+    'System.Management.Automation.TypeAccelerators'
+)
+# Ensure none of the types would clobber an existing type accelerator.
+# If a type accelerator with the same name exists, throw an exception.
+$ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
+foreach ($Type in $ExportableTypes) {
+    if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
+        $Message = @(
+            "Unable to register type accelerator '$($Type.FullName)'"
+            'Accelerator already exists.'
+        ) -join ' - '
+
+        throw [System.Management.Automation.ErrorRecord]::new(
+            [System.InvalidOperationException]::new($Message),
+            'TypeAcceleratorAlreadyExists',
+            [System.Management.Automation.ErrorCategory]::InvalidOperation,
+            $Type.FullName
+        )
+    }
+}
+# Add type accelerators for every exportable type.
+foreach ($Type in $ExportableTypes) {
+    [void]$TypeAcceleratorsClass::Add($Type.FullName, $Type)
+}
+# Remove type accelerators when the module is removed.
+$MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
+    foreach ($Type in $ExportableTypes) {
+        [void]$TypeAcceleratorsClass::Remove($Type.FullName)
+    }
+}.GetNewClosure()

@@ -13,7 +13,8 @@ function Set-AwtrixMoodlight {
     .PARAMETER Kelvin
         Color temperature in Kelvin (e.g., 2300 for warm white).
     .PARAMETER Color
-        The color for the mood light. Accepts a hex string (e.g., '#FF00FF') or an RGB array (e.g., @(155, 38, 182)).
+        The color for the mood light. Accepts a named color (e.g., Red, Purple),
+        a hex string (e.g., '#FF00FF'), or an RGB array (e.g., @(155, 38, 182)).
     .PARAMETER Disable
         Disables mood lighting by sending an empty payload.
     .PARAMETER BaseUri
@@ -46,6 +47,7 @@ function Set-AwtrixMoodlight {
         [int]$Kelvin,
 
         [Parameter(ParameterSetName = 'Color', Mandatory)]
+        [AwtrixColorTransform()]
         $Color,
 
         [Parameter(ParameterSetName = 'Disable', Mandatory)]

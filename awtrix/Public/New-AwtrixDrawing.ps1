@@ -40,7 +40,8 @@ function New-AwtrixDrawing {
     .PARAMETER Radius
         The radius (for circles).
     .PARAMETER Color
-        The draw color. Accepts a hex string (e.g., '#FF0000') or RGB array (e.g., @(255, 0, 0)).
+        The draw color. Accepts a named color (e.g., Red, Green, Blue),
+        a hex string (e.g., '#FF0000'), or an RGB array (e.g., @(255, 0, 0)).
     .PARAMETER TextContent
         The text string to draw (for the Text drawing type).
     .PARAMETER BitmapData
@@ -131,6 +132,7 @@ function New-AwtrixDrawing {
         [Parameter(ParameterSetName = 'Circle', Mandatory)]
         [Parameter(ParameterSetName = 'FilledCircle', Mandatory)]
         [Parameter(ParameterSetName = 'Text', Mandatory)]
+        [AwtrixColorTransform()]
         $Color,
 
         [Parameter(ParameterSetName = 'Text', Mandatory)]

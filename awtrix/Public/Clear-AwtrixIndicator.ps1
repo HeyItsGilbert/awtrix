@@ -5,28 +5,27 @@ function Clear-AwtrixIndicator {
     .DESCRIPTION
         Hides one of the three colored indicators on the AWTRIX 3 display
         by sending an empty payload to the indicator endpoint.
-    .PARAMETER Id
-        The indicator number to clear (1, 2, or 3).
+    .PARAMETER Position
+        The indicator position to clear: Top (upper right), Middle (right side), or Bottom (lower right).
     .PARAMETER BaseUri
         The base URI of the AWTRIX device. If not specified, uses the connection from Connect-Awtrix.
     .EXAMPLE
-        PS> Clear-AwtrixIndicator -Id 1
+        PS> Clear-AwtrixIndicator -Position Top
 
-        Clears indicator 1 (upper right corner).
+        Clears the top indicator (upper right corner).
     .EXAMPLE
-        PS> 1..3 | ForEach-Object { Clear-AwtrixIndicator -Id $_ }
+        PS> [AwtrixIndicatorPosition].GetEnumValues() | ForEach-Object { Clear-AwtrixIndicator -Position $_ }
 
         Clears all three indicators.
     #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, Position = 0)]
-        [ValidateSet(1, 2, 3)]
-        [int]$Id,
+        [AwtrixIndicatorPosition]$Position,
 
         [Parameter()]
         [string]$BaseUri
     )
 
-    InvokeAwtrixApi -Endpoint "indicator$Id" -Method POST -BaseUri $BaseUri
+    InvokeAwtrixApi -Endpoint "indicator$([int]$Position)" -Method POST -BaseUri $BaseUri
 }

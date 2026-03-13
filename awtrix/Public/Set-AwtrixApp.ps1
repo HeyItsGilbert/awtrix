@@ -20,15 +20,16 @@ function Set-AwtrixApp {
     .PARAMETER Center
         Centers a short, non-scrollable text.
     .PARAMETER Color
-        The text, bar, or line color. Accepts a hex string (e.g., '#FF0000') or RGB array (e.g., @(255, 0, 0)).
+        The text, bar, or line color. Accepts a named color (e.g., Red, Green, Blue),
+        a hex string (e.g., '#FF0000'), or an RGB array (e.g., @(255, 0, 0)).
     .PARAMETER Gradient
         Colorizes text in a gradient of two colors. Supply an array of two color values.
-    .PARAMETER BlinkText
+    .PARAMETER BlinkTextMilliseconds
         Blinks the text at the given interval in milliseconds. Not compatible with gradient or rainbow.
-    .PARAMETER FadeText
+    .PARAMETER FadeTextMilliseconds
         Fades the text on and off at the given interval in milliseconds. Not compatible with gradient or rainbow.
     .PARAMETER Background
-        Sets a background color. Accepts a hex string or RGB array.
+        Sets a background color. Accepts a named color, hex string, or RGB array.
     .PARAMETER Rainbow
         Fades each letter through the entire RGB spectrum.
     .PARAMETER Icon
@@ -37,7 +38,7 @@ function Set-AwtrixApp {
         Controls icon behavior: 0 = static, 1 = moves with text (once), 2 = moves with text (repeating).
     .PARAMETER Repeat
         Number of times the text scrolls before the app ends. -1 for indefinite.
-    .PARAMETER Duration
+    .PARAMETER DurationSeconds
         How long the app is displayed in seconds.
     .PARAMETER NoScroll
         Disables text scrolling.
@@ -54,18 +55,18 @@ function Set-AwtrixApp {
     .PARAMETER Autoscale
         Enables or disables autoscaling for bar and line charts.
     .PARAMETER BarBackgroundColor
-        Background color of the bars. Accepts a hex string or RGB array.
+        Background color of the bars. Accepts a named color, hex string, or RGB array.
     .PARAMETER Progress
         Shows a progress bar with value 0-100.
     .PARAMETER ProgressColor
-        The color of the progress bar. Accepts a hex string or RGB array.
+        The color of the progress bar. Accepts a named color, hex string, or RGB array.
     .PARAMETER ProgressBackgroundColor
-        The background color of the progress bar. Accepts a hex string or RGB array.
+        The background color of the progress bar. Accepts a named color, hex string, or RGB array.
     .PARAMETER Draw
         Array of drawing instruction objects. Use New-AwtrixDrawing to create them.
     .PARAMETER Overlay
         Sets an effect overlay. Options: clear, snow, rain, drizzle, storm, thunder, frost.
-    .PARAMETER Lifetime
+    .PARAMETER LifetimeSeconds
         Removes the app if no update is received within this many seconds. 0 = disabled.
     .PARAMETER LifetimeMode
         0 = delete the app when lifetime expires, 1 = mark as stale with red border.
@@ -76,7 +77,7 @@ function Set-AwtrixApp {
     .PARAMETER BaseUri
         The base URI of the AWTRIX device. If not specified, uses the connection from Connect-Awtrix.
     .EXAMPLE
-        PS> Set-AwtrixApp -Name 'myapp' -Text 'Hello World' -Rainbow -Duration 10
+        PS> Set-AwtrixApp -Name 'myapp' -Text 'Hello World' -Rainbow -DurationSeconds 10
 
         Creates an app with rainbow text displayed for 10 seconds.
     .EXAMPLE
@@ -123,18 +124,23 @@ function Set-AwtrixApp {
         [switch]$Center,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $Color,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         [array]$Gradient,
 
         [Parameter()]
-        [int]$BlinkText,
+        [Alias('BlinkTextMs')]
+        [int]$BlinkTextMilliseconds,
 
         [Parameter()]
-        [int]$FadeText,
+        [Alias('FadeTextMs')]
+        [int]$FadeTextMilliseconds,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $Background,
 
         [Parameter()]
@@ -151,7 +157,8 @@ function Set-AwtrixApp {
         [int]$Repeat,
 
         [Parameter()]
-        [int]$Duration,
+        [Alias('DurationSec')]
+        [int]$DurationSeconds,
 
         [Parameter()]
         [switch]$NoScroll,
@@ -175,6 +182,7 @@ function Set-AwtrixApp {
         [switch]$Autoscale,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $BarBackgroundColor,
 
         [Parameter()]
@@ -182,9 +190,11 @@ function Set-AwtrixApp {
         [int]$Progress,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $ProgressColor,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $ProgressBackgroundColor,
 
         [Parameter()]
@@ -195,7 +205,8 @@ function Set-AwtrixApp {
         [string]$Overlay,
 
         [Parameter()]
-        [int]$Lifetime,
+        [Alias('LifetimeSec')]
+        [int]$LifetimeSeconds,
 
         [Parameter()]
         [ValidateSet(0, 1)]

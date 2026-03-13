@@ -18,15 +18,16 @@ function Send-AwtrixNotification {
     .PARAMETER Center
         Centers a short, non-scrollable text.
     .PARAMETER Color
-        The text, bar, or line color. Accepts a hex string or RGB array.
+        The text, bar, or line color. Accepts a named color (e.g., Red, Green, Blue),
+        a hex string, or an RGB array.
     .PARAMETER Gradient
         Colorizes text in a gradient of two colors.
-    .PARAMETER BlinkText
+    .PARAMETER BlinkTextMilliseconds
         Blinks the text at the given interval in milliseconds. Not compatible with gradient or rainbow.
-    .PARAMETER FadeText
+    .PARAMETER FadeTextMilliseconds
         Fades the text on and off at the given interval in milliseconds. Not compatible with gradient or rainbow.
     .PARAMETER Background
-        Sets a background color. Accepts a hex string or RGB array.
+        Sets a background color. Accepts a named color, hex string, or RGB array.
     .PARAMETER Rainbow
         Fades each letter through the entire RGB spectrum.
     .PARAMETER Icon
@@ -35,7 +36,7 @@ function Send-AwtrixNotification {
         Controls icon behavior: 0 = static, 1 = moves with text (once), 2 = moves with text (repeating).
     .PARAMETER Repeat
         Number of times the text scrolls before the notification ends.
-    .PARAMETER Duration
+    .PARAMETER DurationSeconds
         How long the notification is displayed in seconds.
     .PARAMETER Hold
         Holds the notification on top until dismissed via the middle button or Clear-AwtrixNotification.
@@ -67,13 +68,13 @@ function Send-AwtrixNotification {
     .PARAMETER Autoscale
         Enables or disables autoscaling for bar and line charts.
     .PARAMETER BarBackgroundColor
-        Background color of the bars. Accepts a hex string or RGB array.
+        Background color of the bars. Accepts a named color, hex string, or RGB array.
     .PARAMETER Progress
         Shows a progress bar with value 0-100.
     .PARAMETER ProgressColor
-        The color of the progress bar. Accepts a hex string or RGB array.
+        The color of the progress bar. Accepts a named color, hex string, or RGB array.
     .PARAMETER ProgressBackgroundColor
-        The background color of the progress bar. Accepts a hex string or RGB array.
+        The background color of the progress bar. Accepts a named color, hex string, or RGB array.
     .PARAMETER Draw
         Array of drawing instruction objects. Use New-AwtrixDrawing to create them.
     .PARAMETER Overlay
@@ -89,7 +90,7 @@ function Send-AwtrixNotification {
 
         Sends a held notification that stays until dismissed.
     .EXAMPLE
-        PS> Send-AwtrixNotification -Text 'Wake up!' -Wakeup -Duration 15
+        PS> Send-AwtrixNotification -Text 'Wake up!' -Wakeup -DurationSeconds 15
 
         Sends a notification that wakes the display for 15 seconds.
     .EXAMPLE
@@ -97,7 +98,7 @@ function Send-AwtrixNotification {
         >>     New-AwtrixTextFragment -Text 'Error: ' -Color 'FF0000'
         >>     New-AwtrixTextFragment -Text 'disk full' -Color 'FFFFFF'
         >> )
-        PS> Send-AwtrixNotification -Text $fragments -Duration 10
+        PS> Send-AwtrixNotification -Text $fragments -DurationSeconds 10
 
         Sends a notification with colored text fragments.
     #>
@@ -120,18 +121,23 @@ function Send-AwtrixNotification {
         [switch]$Center,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $Color,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         [array]$Gradient,
 
         [Parameter()]
-        [int]$BlinkText,
+        [Alias('BlinkTextMs')]
+        [int]$BlinkTextMilliseconds,
 
         [Parameter()]
-        [int]$FadeText,
+        [Alias('FadeTextMs')]
+        [int]$FadeTextMilliseconds,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $Background,
 
         [Parameter()]
@@ -148,7 +154,8 @@ function Send-AwtrixNotification {
         [int]$Repeat,
 
         [Parameter()]
-        [int]$Duration,
+        [Alias('DurationSec')]
+        [int]$DurationSeconds,
 
         [Parameter()]
         [switch]$Hold,
@@ -193,6 +200,7 @@ function Send-AwtrixNotification {
         [switch]$Autoscale,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $BarBackgroundColor,
 
         [Parameter()]
@@ -200,9 +208,11 @@ function Send-AwtrixNotification {
         [int]$Progress,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $ProgressColor,
 
         [Parameter()]
+        [AwtrixColorTransform()]
         $ProgressBackgroundColor,
 
         [Parameter()]

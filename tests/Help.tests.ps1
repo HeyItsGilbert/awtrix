@@ -30,6 +30,13 @@ BeforeDiscovery {
 
     ## When testing help, remember that help is cached at the beginning of each session.
     ## To test, restart session.
+
+    # Get a list of exported types
+    $TypeAcceleratorsClass = [psobject].Assembly.GetType(
+        'System.Management.Automation.TypeAccelerators'
+    )
+    $ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
+    $exportedTypes = $ExistingTypeAccelerators.GetEnumerator() | Where-Object { $_.Value.Assembly.GetName().Name -eq $env:BHProjectName } | Select-Object -Property Name, Value
 }
 
 Describe "Test help for <_.Name>" -ForEach $commands {
@@ -100,6 +107,10 @@ Describe "Test help for <_.Name>" -ForEach $commands {
 
         # Parameter type in help should match code
         It "Has correct parameter type" {
+            # Skip if exported type is used in parameter, since help only shows the type name and not the namespace
+            if ($parameterHelpType -in $exportedTypes.Value.FullName) {
+                Set-ItResult -Skipped -Because "parameter type $($parameterHelpType) is an exported type and wont show namespace in help"
+            }
             $parameterHelpType | Should -Be $parameter.ParameterType.Name
         }
     }

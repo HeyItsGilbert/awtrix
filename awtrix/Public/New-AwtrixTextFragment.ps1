@@ -9,7 +9,8 @@ function New-AwtrixTextFragment {
     .PARAMETER Text
         The text content for this fragment.
     .PARAMETER Color
-        The hex color for this fragment (without # prefix), e.g., 'FF0000' for red.
+        The color for this fragment. Accepts a named color (e.g., Red, Blue),
+        or a hex color string (e.g., 'FF0000' or '#FF0000').
     .EXAMPLE
         PS> New-AwtrixTextFragment -Text 'Hello' -Color 'FF0000'
 
@@ -30,6 +31,7 @@ function New-AwtrixTextFragment {
         [string]$Text,
 
         [Parameter(Mandatory, Position = 1)]
+        [AwtrixColorTransform()]
         [string]$Color
     )
 

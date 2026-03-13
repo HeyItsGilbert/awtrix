@@ -1,9 +1,17 @@
 BeforeAll {
-    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\awtrix\awtrix.psm1'
-    Get-Module awtrix | Remove-Module -Force -ErrorAction Ignore
-    Import-Module $modulePath -Force
+    if ($null -eq $env:BHPSModuleManifest) {
+        & "$PSScriptRoot/../Build.ps1" -Task Init
+    }
+    $manifest = Import-PowerShellDataFile -Path $env:BHPSModuleManifest
+    $outputDir = Join-Path -Path $env:BHProjectPath -ChildPath 'Output'
+    $outputModDir = Join-Path -Path $outputDir -ChildPath $env:BHProjectName
+    $outputModVerDir = Join-Path -Path $outputModDir -ChildPath $manifest.ModuleVersion
+    $outputModVerManifest = Join-Path -Path $outputModVerDir -ChildPath "$($env:BHProjectName).psd1"
 
-    & (Get-Module awtrix) { $script:AwtrixConnection = @{ BaseUri = 'http://192.168.1.100' } }
+    Get-Module $env:BHProjectName | Remove-Module -Force -ErrorAction Ignore
+    Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
+
+    & (Get-Module $env:BHProjectName) { $script:AwtrixConnection = @{ BaseUri = 'http://192.168.1.100' } }
 }
 
 Describe 'Set-AwtrixApp' {
@@ -35,7 +43,7 @@ Describe 'Set-AwtrixApp' {
     }
 
     It 'Includes duration in payload' {
-        Set-AwtrixApp -Name 'myapp' -Text 'Hi' -Duration 10
+        Set-AwtrixApp -Name 'myapp' -Text 'Hi' -DurationSeconds 10
         Should -Invoke Invoke-RestMethod -ModuleName awtrix -ParameterFilter {
             ($Body | ConvertFrom-Json).duration -eq 10
         }
@@ -79,7 +87,7 @@ Describe 'Set-AwtrixApp' {
     }
 
     It 'Includes lifetime settings' {
-        Set-AwtrixApp -Name 'myapp' -Text 'Hi' -Lifetime 300 -LifetimeMode 1
+        Set-AwtrixApp -Name 'myapp' -Text 'Hi' -LifetimeSeconds 300 -LifetimeMode 1
         Should -Invoke Invoke-RestMethod -ModuleName awtrix -ParameterFilter {
             $parsed = $Body | ConvertFrom-Json
             $parsed.lifetime -eq 300 -and $parsed.lifetimeMode -eq 1

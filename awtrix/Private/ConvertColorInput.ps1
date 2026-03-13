@@ -2,6 +2,10 @@ function ConvertColorInput {
     <#
     .SYNOPSIS
         Normalizes color input for the AWTRIX API.
+    .DESCRIPTION
+        Delegates to AwtrixColorTransformAttribute.ConvertColor for consistent
+        color resolution across the module. Accepts named colors, hex strings,
+        and RGB arrays.
     #>
     [CmdletBinding()]
     [OutputType([string], [object[]])]
@@ -10,20 +14,5 @@ function ConvertColorInput {
         $Color
     )
 
-    # Pass through arrays as-is (RGB)
-    if ($Color -is [array]) {
-        return , $Color
-    }
-
-    # Pass through strings (hex or '0' for hide)
-    if ($Color -is [string]) {
-        return $Color
-    }
-
-    # Integer 0 used to hide indicators
-    if ($Color -is [int] -and $Color -eq 0) {
-        return '0'
-    }
-
-    return $Color
+    return [AwtrixColorTransformAttribute]::ConvertColor($Color)
 }

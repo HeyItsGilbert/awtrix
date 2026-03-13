@@ -1,12 +1,28 @@
+BeforeDiscovery {
+    $env:IgnoreSpectreEncoding = $true
+    # Check if PwshSpectreConsole is available, if not skip all tests since the main function Show-AwtrixScreen depends on it
+    if (-not (Get-Module PwshSpectreConsole -ListAvailable)) {
+        Write-Warning "PwshSpectreConsole module not found, skipping all tests since Show-AwtrixScreen depends on it"
+        $script:SkipAll = $true
+    }
+}
 BeforeAll {
-    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\awtrix\awtrix.psm1'
-    Get-Module awtrix | Remove-Module -Force -ErrorAction Ignore
-    Import-Module $modulePath -Force
+    if ($null -eq $env:BHPSModuleManifest) {
+        & "$PSScriptRoot/../Build.ps1" -Task Init
+    }
+    $manifest = Import-PowerShellDataFile -Path $env:BHPSModuleManifest
+    $outputDir = Join-Path -Path $env:BHProjectPath -ChildPath 'Output'
+    $outputModDir = Join-Path -Path $outputDir -ChildPath $env:BHProjectName
+    $outputModVerDir = Join-Path -Path $outputModDir -ChildPath $manifest.ModuleVersion
+    $outputModVerManifest = Join-Path -Path $outputModVerDir -ChildPath "$($env:BHProjectName).psd1"
 
-    & (Get-Module awtrix) { $script:AwtrixConnection = @{ BaseUri = 'http://192.168.1.100' } }
+    Get-Module $env:BHProjectName | Remove-Module -Force -ErrorAction Ignore
+    Import-Module -Name $outputModVerManifest -Verbose:$false -ErrorAction Stop
+
+    & (Get-Module $env:BHProjectName) { $script:AwtrixConnection = @{ BaseUri = 'http://192.168.1.100' } }
 }
 
-Describe 'Show-AwtrixScreen' {
+Describe 'Show-AwtrixScreen' -Skip:$script:SkipAll {
 
     BeforeAll {
         # Generate a full 32x8 (256 pixel) screen of known colors

@@ -13,8 +13,8 @@ Sets a colored indicator on the AWTRIX display.
 ## SYNTAX
 
 ```
-Set-AwtrixIndicator [-Id] <Int32> [-Color] <Object> [-Blink <Int32>] [-Fade <Int32>] [-BaseUri <String>]
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Set-AwtrixIndicator [-Position] <AwtrixIndicatorPosition> [-Color] <Object> [-BlinkMilliseconds <Int32>]
+ [-FadeMilliseconds <Int32>] [-BaseUri <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -50,17 +50,18 @@ Sets indicator 3 to blue, fading every 1000ms.
 
 ## PARAMETERS
 
-### -Id
-The indicator number (1, 2, or 3).
+### -Position
+The indicator position on the display: Top (upper right), Middle (right side), or Bottom (lower right).
 
 ```yaml
-Type: Int32
+Type: AwtrixIndicatorPosition
 Parameter Sets: (All)
 Aliases:
+Accepted values: Top, Middle, Bottom
 
 Required: True
 Position: 1
-Default value: 0
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -81,13 +82,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Blink
+### -BlinkMilliseconds
 Makes the indicator blink at the specified interval in milliseconds.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: BlinkMs
 
 Required: False
 Position: Named
@@ -96,13 +97,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Fade
+### -FadeMilliseconds
 Makes the indicator fade on and off at the specified interval in milliseconds.
 
 ```yaml
 Type: Int32
 Parameter Sets: (All)
-Aliases:
+Aliases: FadeMs
 
 Required: False
 Position: Named
