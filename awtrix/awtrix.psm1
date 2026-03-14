@@ -13,6 +13,10 @@ foreach ($import in @($classes + $public + $private)) {
     }
 }
 
+if ( Get-Module -Name PwshSpectreConsole -ListAvailable) {
+    Import-Module PwshSpectreConsole -ErrorAction Stop
+}
+
 Export-ModuleMember -Function $public.Basename
 
 # Define the types to export with type accelerators.
@@ -29,10 +33,12 @@ $TypeAcceleratorsClass = [psobject].Assembly.GetType(
 # If a type accelerator with the same name exists, throw an exception.
 $ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
 foreach ($Type in $ExportableTypes) {
-    if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
+    if ($Type.FullName -in $ExistingTypeAccelerators.Keys -and
+        # Check if it's from our assembly, if it exists. This allows re-importing the module without error.
+        $ExistingTypeAccelerators[$Type.FullName].Assembly.GetName().Name -ne 'awtrix') {
         $Message = @(
             "Unable to register type accelerator '$($Type.FullName)'"
-            'Accelerator already exists.'
+            "Accelerator already exists from assembly '$($ExistingTypeAccelerators[$Type.FullName].Assembly.GetName().Name)'."
         ) -join ' - '
 
         throw [System.Management.Automation.ErrorRecord]::new(

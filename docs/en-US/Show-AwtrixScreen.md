@@ -13,7 +13,7 @@ Renders the current AWTRIX screen as colored pixels in the terminal.
 ## SYNTAX
 
 ```
-Show-AwtrixScreen [[-ScreenData] <Int32[]>] [[-BaseUri] <String>] [[-PixelSize] <Int32>]
+Show-AwtrixScreen [[-ScreenData] <Int32[]>] [[-BaseUri] <String>] [[-PixelSize] <Int32>] [[-GapSize] <Int32>]
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -95,6 +95,22 @@ Aliases:
 Required: False
 Position: 3
 Default value: 2
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -GapSize
+Number of black pixels to insert between each LED pixel, simulating the
+dark border between LEDs on a real matrix display. Default is 1.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: 1
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
