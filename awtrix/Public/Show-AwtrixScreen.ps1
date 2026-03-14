@@ -15,8 +15,11 @@ function Show-AwtrixScreen {
     .PARAMETER BaseUri
         The base URI of the AWTRIX device. If not specified, uses the connection from Connect-Awtrix.
     .PARAMETER PixelSize
-        Scale factor for each pixel. Default is 2, meaning each LED pixel maps to
-        a 2x2 block on the canvas for better visibility.
+        Scale factor for each pixel. Default is 1, meaning each LED pixel maps to
+        a 1x1 block on the canvas for better visibility.
+    .PARAMETER GapSize
+        Number of black pixels to insert between each LED pixel, simulating the
+        dark border between LEDs on a real matrix display. Default is 0.
     .EXAMPLE
         PS> Show-AwtrixScreen
 
@@ -40,15 +43,19 @@ function Show-AwtrixScreen {
 
         [Parameter()]
         [ValidateRange(1, 5)]
-        [int]$PixelSize = 2
+        [int]$PixelSize = 1,
+
+        [Parameter()]
+        [ValidateRange(0, 3)]
+        [int]$GapSize = 0
     )
 
     begin {
-        if (-not (Get-Module -Name PwshSpectreConsole -ListAvailable)) {
+        if (-not (Get-Module -Name PwshSpectreConsole)) {
             throw 'PwshSpectreConsole module is required. Install it with: Install-Module PwshSpectreConsole'
         }
 
-        Import-Module PwshSpectreConsole -ErrorAction Stop
+        # Import-Module PwshSpectreConsole -ErrorAction Stop
 
         $collectedData = [System.Collections.Generic.List[int]]::new()
     }
@@ -65,9 +72,14 @@ function Show-AwtrixScreen {
         if ($collectedData.Count -eq 0) {
             $fetchParams = @{}
             if ($BaseUri) { $fetchParams['BaseUri'] = $BaseUri }
-            $collectedData = [System.Collections.Generic.List[int]]::new(
-                [int[]](Get-AwtrixScreen @fetchParams)
-            )
+            try {
+                $collectedData = [System.Collections.Generic.List[int]]::new(
+                    [int[]](Get-AwtrixScreen @fetchParams -ErrorAction Stop)
+                )
+            }
+            catch {
+                $PSCmdlet.ThrowTerminatingError($_)
+            }
         }
 
         $matrixWidth = 32
@@ -78,8 +90,9 @@ function Show-AwtrixScreen {
             throw "Expected $expectedPixels pixel values (32x8) but received $($collectedData.Count)."
         }
 
-        $canvasWidth = $matrixWidth * $PixelSize
-        $canvasHeight = $matrixHeight * $PixelSize
+        $stride = $PixelSize + $GapSize
+        $canvasWidth = $matrixWidth * $stride - $GapSize
+        $canvasHeight = $matrixHeight * $stride - $GapSize
         $canvas = [Spectre.Console.Canvas]::new($canvasWidth, $canvasHeight)
 
         for ($y = 0; $y -lt $matrixHeight; $y++) {
@@ -91,12 +104,12 @@ function Show-AwtrixScreen {
                 $b = [byte]($colorInt -band 0xFF)
                 $color = [Spectre.Console.Color]::new($r, $g, $b)
 
-                # Fill the scaled pixel block
+                # Fill the scaled pixel block, leaving gap rows/columns black
                 for ($py = 0; $py -lt $PixelSize; $py++) {
                     for ($px = 0; $px -lt $PixelSize; $px++) {
-                        $canvas.SetPixel(
-                            ($x * $PixelSize) + $px,
-                            ($y * $PixelSize) + $py,
+                        $canvas = $canvas.SetPixel(
+                            ($x * $stride) + $px,
+                            ($y * $stride) + $py,
                             $color
                         )
                     }
@@ -104,6 +117,6 @@ function Show-AwtrixScreen {
             }
         }
 
-        [Spectre.Console.AnsiConsole]::Write($canvas)
+        $canvas | Out-SpectreHost
     }
 }
