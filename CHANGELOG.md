@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.4.0] 2026-03-14
+
+### Added
+
+- **First-Class App Objects** — Apps and notifications are now full-fledged
+  stateful PowerShell objects with methods, properties, and lifecycle
+  management, enabling sophisticated scenarios:
+  - `AwtrixApp` class — Represents a persistent custom app with state
+    management, dirty tracking, and serialization
+  - `AwtrixNotification` class — Represents a one-time notification with
+    hold, sound, wakeup, and stacking support
+  - `AwtrixAppBase` base class — Shared infrastructure for 24 display
+    properties (text, colors, effects, charts, drawing, overlays, etc.)
+  - `AwtrixAppCollection` class — Multi-page app batching via single API
+    call (device-assigned suffixes: BaseName0, BaseName1, etc.)
+- `New-AwtrixApp` cmdlet — Create and optionally push `[AwtrixApp]`
+  objects. Returns object for property mutation, template cloning, and
+  serialization workflows
+- `New-AwtrixNotification` cmdlet — Create `[AwtrixNotification]` objects
+  for deferred or immediate dispatch
+- `Update-AwtrixApp` cmdlet — Pipeline cmdlet to update app properties and
+  push. Supports `-DirtyOnly` for incremental updates (only changed
+  properties sent to device)
+- `New-AwtrixAppCollection` cmdlet — Batch multi-page apps with unified
+  push/remove operations
+- Object methods: `Push()`, `Push($dirtyOnly)`, `Remove()`, `SwitchTo()`,
+  `Send()` for imperative app lifecycle
+- Object methods: `ToJson()`, `FromJson()` for config serialization and
+  restoration
+- Object method: `Clone($newName)` for template/variant patterns
+- Object method: `GetDirtyPayload()` for incremental updates
+- Type accelerators for new classes: `[AwtrixApp]`, `[AwtrixNotification]`,
+  `[AwtrixAppBase]`, `[AwtrixAppCollection]`
+
+### Changed
+
+- `Set-AwtrixApp` now internally uses `[AwtrixApp]` class and supports
+  `-PassThru` to return the object. Fully backward-compatible — omit
+  `-PassThru` for fire-and-forget behavior (default)
+- `Send-AwtrixNotification` now internally uses `[AwtrixNotification]`
+  class and supports `-PassThru`. Fully backward-compatible
+- Module loading now establishes static delegate
+  `[AwtrixAppBase]::InvokeApi` during initialization to enable class
+  methods to call module-scoped `InvokeAwtrixApi` function
+
 ## [0.3.0] 2026-03-13
 
 ### Added
