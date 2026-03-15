@@ -82,7 +82,10 @@
         'Get-AwtrixSetting'
         'Get-AwtrixStats'
         'Get-AwtrixTransition'
+        'New-AwtrixApp'
+        'New-AwtrixAppCollection'
         'New-AwtrixDrawing'
+        'New-AwtrixNotification'
         'New-AwtrixTextFragment'
         'Remove-AwtrixApp'
         'Reset-Awtrix'
@@ -99,6 +102,7 @@
         'Show-AwtrixScreen'
         'Start-AwtrixSleep'
         'Switch-AwtrixApp'
+        'Update-AwtrixApp'
         'Update-AwtrixFirmware'
     )
 

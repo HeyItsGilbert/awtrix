@@ -1,112 +1,116 @@
-function Set-AwtrixApp {
+function New-AwtrixApp {
     <#
     .SYNOPSIS
-        Creates or updates a custom app on the AWTRIX device.
+        Creates an AwtrixApp object, optionally pushing it to the device immediately.
     .DESCRIPTION
-        Creates or updates a custom app on the AWTRIX 3 device with text, icons, charts,
-        progress bars, drawing instructions, and visual effects. The app is added to the
-        display loop and can be updated by sending new data to the same app name.
+        Returns an [AwtrixApp] object that holds the full state of a custom AWTRIX app.
+        The object can be modified, pushed to the device, cloned into templates, and
+        serialized to/from JSON — all without additional API calls until you're ready.
+
+        Use -Push to send the app to the device in the same call. Omit -Push to build
+        the object locally first, set properties, then call $app.Push() when ready.
     .PARAMETER Name
-        The name of the custom app. Used to identify the app for updates or removal.
+        The unique app name used to identify and update the app on the device.
     .PARAMETER Text
-        The text to display. Can be a simple string or an array of colored text fragment
-        objects created by New-AwtrixTextFragment.
+        The text to display. A simple string or an array of colored fragment objects
+        created by New-AwtrixTextFragment.
     .PARAMETER TextCase
-        Changes the uppercase setting. 0 = global setting, 1 = force uppercase, 2 = show as sent.
+        0 = global setting, 1 = force uppercase, 2 = show as sent.
     .PARAMETER TopText
-        Draw the text on top of the display.
+        Draw text on top of the display.
     .PARAMETER TextOffset
-        Sets an offset for the x position of the starting text.
+        X-axis offset for the starting text position.
     .PARAMETER Center
         Centers a short, non-scrollable text.
     .PARAMETER Color
-        The text, bar, or line color. Accepts a named color (e.g., Red, Green, Blue),
-        a hex string (e.g., '#FF0000'), or an RGB array (e.g., @(255, 0, 0)).
+        Text, bar, or line color. Accepts a named color, hex string, or RGB array.
     .PARAMETER Gradient
-        Colorizes text in a gradient of two colors. Supply an array of two color values.
+        Colorizes text in a gradient of two colors.
     .PARAMETER BlinkTextMilliseconds
-        Blinks the text at the given interval in milliseconds. Not compatible with gradient or rainbow.
+        Blinks the text at the given interval in ms. Not compatible with gradient or rainbow.
     .PARAMETER FadeTextMilliseconds
-        Fades the text on and off at the given interval in milliseconds. Not compatible with gradient or rainbow.
+        Fades the text on and off at the given interval in ms. Not compatible with gradient or rainbow.
     .PARAMETER Background
-        Sets a background color. Accepts a named color, hex string, or RGB array.
+        Background color. Accepts a named color, hex string, or RGB array.
     .PARAMETER Rainbow
         Fades each letter through the entire RGB spectrum.
     .PARAMETER Icon
-        The icon ID or filename (without extension) to display. Can also be a Base64-encoded 8x8 JPG.
+        Icon ID, filename (without extension), or Base64-encoded 8x8 JPG.
     .PARAMETER PushIcon
-        Controls icon behavior: 0 = static, 1 = moves with text (once), 2 = moves with text (repeating).
+        0 = static, 1 = moves with text once, 2 = moves with text repeatedly.
     .PARAMETER Repeat
-        Number of times the text scrolls before the app ends. -1 for indefinite.
+        Number of times the text scrolls before the app ends. -1 = indefinite.
     .PARAMETER DurationSeconds
         How long the app is displayed in seconds.
     .PARAMETER NoScroll
         Disables text scrolling.
     .PARAMETER ScrollSpeed
-        Modifies scroll speed as a percentage of the original speed.
+        Scroll speed as a percentage of the original speed.
     .PARAMETER Effect
-        Shows a background effect. Send empty string to remove an existing effect.
+        Background effect name. Empty string removes an existing effect.
     .PARAMETER EffectSettings
-        A hashtable to change color and speed of the background effect.
+        Hashtable to change color and speed of the background effect.
     .PARAMETER Bar
-        Draws a bar graph. Maximum 16 values without icon, 11 with icon.
+        Bar chart data. Max 16 values without icon, 11 with icon.
     .PARAMETER Line
-        Draws a line chart. Maximum 16 values without icon, 11 with icon.
+        Line chart data. Max 16 values without icon, 11 with icon.
     .PARAMETER Autoscale
-        Enables or disables autoscaling for bar and line charts.
+        Enables or disables auto-scaling for bar and line charts.
     .PARAMETER BarBackgroundColor
-        Background color of the bars. Accepts a named color, hex string, or RGB array.
+        Background color of bar chart bars.
     .PARAMETER Progress
-        Shows a progress bar with value 0-100.
+        Progress bar value 0–100.
     .PARAMETER ProgressColor
-        The color of the progress bar. Accepts a named color, hex string, or RGB array.
+        Progress bar foreground color.
     .PARAMETER ProgressBackgroundColor
-        The background color of the progress bar. Accepts a named color, hex string, or RGB array.
+        Progress bar background color.
     .PARAMETER Draw
         Array of drawing instruction objects. Use New-AwtrixDrawing to create them.
     .PARAMETER Overlay
-        Sets an effect overlay. Options: clear, snow, rain, drizzle, storm, thunder, frost.
+        Effect overlay: clear, snow, rain, drizzle, storm, thunder, frost.
     .PARAMETER LifetimeSeconds
         Removes the app if no update is received within this many seconds. 0 = disabled.
     .PARAMETER LifetimeMode
-        0 = delete the app when lifetime expires, 1 = mark as stale with red border.
+        0 = delete app on expiry, 1 = mark as stale with red border.
     .PARAMETER Position
-        Position of the app in the loop (0-based). Only applies on first push. Experimental.
+        0-based loop position. Applied only on first push. Experimental.
     .PARAMETER Save
-        Saves the app to flash memory, persisting across reboots. Avoid for frequently updated apps.
-    .PARAMETER PassThru
-        Returns the [AwtrixApp] object after pushing. By default Set-AwtrixApp produces no output.
+        Persist app to flash memory across reboots. Avoid for frequently updated apps.
+    .PARAMETER Push
+        Send the app to the device immediately after creating the object.
     .PARAMETER BaseUri
-        The base URI of the AWTRIX device. If not specified, uses the connection from Connect-Awtrix.
+        Base URI of the AWTRIX device. Overrides the module-level connection for this app.
     .EXAMPLE
-        PS> Set-AwtrixApp -Name 'myapp' -Text 'Hello World' -Rainbow -DurationSeconds 10
+        PS> $app = New-AwtrixApp -Name 'weather' -Icon 'temperature' -Color '#FF6600'
+        PS> $app.Text = '72°F'
+        PS> $app.Push()
 
-        Creates an app with rainbow text displayed for 10 seconds.
+        Creates an app object locally, sets text, then pushes to the device.
     .EXAMPLE
-        PS> Set-AwtrixApp -Name 'temp' -Text '72°F' -Icon 'temperature' -Color '#FF6600'
+        PS> $app = New-AwtrixApp -Name 'greeting' -Text 'Hello!' -Rainbow -DurationSeconds 10 -Push
 
-        Creates a temperature display app with an icon.
+        Creates and immediately pushes an app with rainbow text.
     .EXAMPLE
-        PS> Set-AwtrixApp -Name 'chart' -Bar @(1,5,3,8,2,6,4,7) -Color '#00FF00'
+        PS> $base = New-AwtrixApp -Icon 'temperature' -Color '#FF6600' -DurationSeconds 10
+        PS> $indoor  = $base.Clone('temp_indoor');  $indoor.Text  = '72°F'; $indoor.Push()
+        PS> $outdoor = $base.Clone('temp_outdoor'); $outdoor.Text = '45°F'; $outdoor.Push()
 
-        Creates a bar chart app.
+        Template pattern: clone a base configuration and push two variants.
     .EXAMPLE
-        PS> $drawings = @(
-        >>     New-AwtrixDrawing -Circle -X 28 -Y 4 -Radius 3 -Color '#FF0000'
-        >>     New-AwtrixDrawing -Text -X 0 -Y 0 -TextContent 'Hi' -Color '#00FF00'
-        >> )
-        PS> Set-AwtrixApp -Name 'custom' -Draw $drawings
+        PS> $app = New-AwtrixApp -Name 'status' -Text 'OK' -Push
+        PS> $app.ToJson() | Set-Content 'status.json'
+        PS> $restored = [AwtrixApp]::FromJson((Get-Content 'status.json' -Raw))
 
-        Creates an app with custom drawing instructions.
+        Serialize and restore an app configuration.
     #>
     [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-        'PSReviewUnusedParameter',
-        '',
-        Justification = 'Switches used as ParameterSetNames'
+        'PSReviewUnusedParameter', '',
+        Justification = 'Parameters are applied via PSBoundParameters loop'
     )]
     [CmdletBinding()]
+    [OutputType([AwtrixApp])]
     param(
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Position = 0)]
         [string]$Name,
 
         [Parameter(Position = 1)]
@@ -221,15 +225,15 @@ function Set-AwtrixApp {
         [switch]$Save,
 
         [Parameter()]
-    [switch]$PassThru,
+        [switch]$Push,
 
-    [Parameter()]
-    [string]$BaseUri
+        [Parameter()]
+        [string]$BaseUri
     )
 
-    $app = [AwtrixApp]::new($Name)
+    $app = [AwtrixApp]::new()
 
-    $skip = @('Name', 'BaseUri', 'PassThru')
+    $skip = @('Push', 'BaseUri')
     $colorParams = @('Color', 'Gradient', 'Background', 'BarBackgroundColor', 'ProgressColor', 'ProgressBackgroundColor')
     foreach ($key in $PSBoundParameters.Keys) {
         if ($key -in $skip) { continue }
@@ -247,10 +251,9 @@ function Set-AwtrixApp {
         $app._baseUri = $BaseUri
     }
 
-    $app.Push()
-
-    if ($PassThru) {
-        $app
+    if ($Push) {
+        $app.Push()
     }
-}
 
+    $app
+}

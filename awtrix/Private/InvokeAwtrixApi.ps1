@@ -13,7 +13,7 @@ function InvokeAwtrixApi {
         [string]$Method = 'GET',
 
         [Parameter()]
-        [hashtable]$Body,
+        $Body,
 
         [Parameter()]
         [string]$RawBody,

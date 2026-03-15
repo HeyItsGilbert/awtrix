@@ -13,6 +13,22 @@ foreach ($import in @($classes + $public + $private)) {
     }
 }
 
+# Wire the InvokeApi static delegate so AwtrixApp/AwtrixNotification/AwtrixAppCollection
+# class methods can call InvokeAwtrixApi (which is module-scoped and not visible from
+# ScriptsToProcess class definitions). This scriptblock closes over the module scope.
+[AwtrixAppBase]::InvokeApi = {
+    param(
+        [string]$Endpoint,
+        [string]$Method = 'GET',
+        $Body,
+        [string]$RawBody,
+        [string]$QueryString,
+        [string]$BaseUri
+    )
+    InvokeAwtrixApi -Endpoint $Endpoint -Method $Method -Body $Body `
+        -RawBody $RawBody -QueryString $QueryString -BaseUri $BaseUri
+}
+
 if ( Get-Module -Name PwshSpectreConsole -ListAvailable) {
     Import-Module PwshSpectreConsole -ErrorAction Stop
 }
@@ -23,7 +39,11 @@ Export-ModuleMember -Function $public.Basename
 $ExportableTypes = @(
     [AwtrixColor],
     [AwtrixIndicatorPosition],
-    [AwtrixColorTransformAttribute]
+    [AwtrixColorTransformAttribute],
+    [AwtrixAppBase],
+    [AwtrixApp],
+    [AwtrixNotification],
+    [AwtrixAppCollection]
 )
 # Get the internal TypeAccelerators class to use its static methods.
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(

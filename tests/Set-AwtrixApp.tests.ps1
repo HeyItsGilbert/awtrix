@@ -112,4 +112,21 @@ Describe 'Set-AwtrixApp' {
             ($Body | ConvertFrom-Json).draw.Count -eq 2
         }
     }
+
+    It '-PassThru returns an AwtrixApp object' {
+        $result = Set-AwtrixApp -Name 'pt' -Text 'Hello' -PassThru
+        $result | Should -BeOfType ([AwtrixApp])
+    }
+
+    It '-PassThru object has correct Name and properties' {
+        $result = Set-AwtrixApp -Name 'ptprops' -Text 'World' -DurationSeconds 8 -PassThru
+        $result.Name            | Should -Be 'ptprops'
+        $result.Text            | Should -Be 'World'
+        $result.DurationSeconds | Should -Be 8
+    }
+
+    It 'Returns nothing when -PassThru is omitted' {
+        $result = Set-AwtrixApp -Name 'nopt' -Text 'Hi'
+        $result | Should -BeNullOrEmpty
+    }
 }

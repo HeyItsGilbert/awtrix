@@ -19,7 +19,7 @@ Send-AwtrixNotification [[-Text] <Object>] [-TextCase <Int32>] [-TopText] [-Text
  [-DurationSeconds <Int32>] [-Hold] [-Sound <String>] [-Rtttl <String>] [-LoopSound] [-Stack] [-Wakeup]
  [-Clients <String[]>] [-NoScroll] [-ScrollSpeed <Int32>] [-Effect <String>] [-EffectSettings <Hashtable>]
  [-Bar <Int32[]>] [-Line <Int32[]>] [-Autoscale] [-BarBackgroundColor <Object>] [-Progress <Int32>]
- [-ProgressColor <Object>] [-ProgressBackgroundColor <Object>] [-Draw <Array>] [-Overlay <String>]
+ [-ProgressColor <Object>] [-ProgressBackgroundColor <Object>] [-Draw <Array>] [-Overlay <String>] [-PassThru]
  [-BaseUri <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
@@ -601,6 +601,21 @@ Aliases:
 Required: False
 Position: Named
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -PassThru
+{{ Fill PassThru Description }}
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
