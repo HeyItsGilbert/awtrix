@@ -1,9 +1,15 @@
 {
+  "name": "awtrix-skills",
+  "owner": {
+    "name": "HeyItsGilbert",
+    "url": "https://github.com/HeyItsGilbert"
+  },
   "plugins": [
     {
       "name": "awtrix",
+      "source": "./",
       "description": "Skill for using the awtrix PowerShell module to control AWTRIX 3 pixel clock devices",
-      "path": "."
+      "version": "0.4.0"
     }
   ]
 }

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/awtrix/$HOME/.claude/**)",
+      "Read(//d/awtrix/$HOME/.claude/plugins/**)"
+    ]
+  }
+}
