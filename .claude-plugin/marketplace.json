@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "name": "awtrix",
+      "description": "Skill for using the awtrix PowerShell module to control AWTRIX 3 pixel clock devices",
+      "path": "."
+    }
+  ]
+}

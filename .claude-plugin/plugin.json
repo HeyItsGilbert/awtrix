@@ -1,0 +1,6 @@
+{
+  "name": "awtrix",
+  "version": "0.4.0",
+  "description": "Skill for using the awtrix PowerShell module to control AWTRIX 3 pixel clock devices",
+  "repository": "https://github.com/HeyItsGilbert/awtrix"
+}
