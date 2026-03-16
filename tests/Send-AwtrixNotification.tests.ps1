@@ -78,4 +78,21 @@ Describe 'Send-AwtrixNotification' {
             $null -eq ($Body | ConvertFrom-Json).BaseUri
         }
     }
+
+    It '-PassThru returns an AwtrixNotification object' {
+        $result = Send-AwtrixNotification -Text 'Alert!' -PassThru
+        $result | Should -BeOfType ([AwtrixNotification])
+    }
+
+    It '-PassThru object has correct properties' {
+        $result = Send-AwtrixNotification -Text 'Alert!' -Sound 'alarm' -Hold -PassThru
+        $result.Text  | Should -Be 'Alert!'
+        $result.Sound | Should -Be 'alarm'
+        $result.Hold  | Should -Be $true
+    }
+
+    It 'Returns nothing when -PassThru is omitted' {
+        $result = Send-AwtrixNotification -Text 'Quiet'
+        $result | Should -BeNullOrEmpty
+    }
 }

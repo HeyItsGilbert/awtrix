@@ -12,7 +12,7 @@
     RootModule = 'awtrix.psm1'
 
     # Version number of this module.
-    ModuleVersion = '0.3.0'
+    ModuleVersion = '0.4.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -82,7 +82,10 @@
         'Get-AwtrixSetting'
         'Get-AwtrixStats'
         'Get-AwtrixTransition'
+        'New-AwtrixApp'
+        'New-AwtrixAppCollection'
         'New-AwtrixDrawing'
+        'New-AwtrixNotification'
         'New-AwtrixTextFragment'
         'Remove-AwtrixApp'
         'Reset-Awtrix'
@@ -99,6 +102,7 @@
         'Show-AwtrixScreen'
         'Start-AwtrixSleep'
         'Switch-AwtrixApp'
+        'Update-AwtrixApp'
         'Update-AwtrixFirmware'
     )
 

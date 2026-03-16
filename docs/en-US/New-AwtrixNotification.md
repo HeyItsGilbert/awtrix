@@ -5,86 +5,65 @@ online version:
 schema: 2.0.0
 ---
 
-# Set-AwtrixApp
+# New-AwtrixNotification
 
 ## SYNOPSIS
-Creates or updates a custom app on the AWTRIX device.
+Creates an AwtrixNotification object for deferred or reusable dispatch.
 
 ## SYNTAX
 
 ```
-Set-AwtrixApp [-Name] <String> [[-Text] <Object>] [-TextCase <Int32>] [-TopText] [-TextOffset <Int32>]
- [-Center] [-Color <Object>] [-Gradient <Array>] [-BlinkTextMilliseconds <Int32>]
- [-FadeTextMilliseconds <Int32>] [-Background <Object>] [-Rainbow] [-Icon <String>] [-PushIcon <Int32>]
- [-Repeat <Int32>] [-DurationSeconds <Int32>] [-NoScroll] [-ScrollSpeed <Int32>] [-Effect <String>]
- [-EffectSettings <Hashtable>] [-Bar <Int32[]>] [-Line <Int32[]>] [-Autoscale] [-BarBackgroundColor <Object>]
- [-Progress <Int32>] [-ProgressColor <Object>] [-ProgressBackgroundColor <Object>] [-Draw <Array>]
- [-Overlay <String>] [-LifetimeSeconds <Int32>] [-LifetimeMode <Int32>] [-Position <Int32>] [-Save] [-PassThru]
+New-AwtrixNotification [[-Text] <Object>] [-TextCase <Int32>] [-TopText] [-TextOffset <Int32>] [-Center]
+ [-Color <Object>] [-Gradient <Array>] [-BlinkTextMilliseconds <Int32>] [-FadeTextMilliseconds <Int32>]
+ [-Background <Object>] [-Rainbow] [-Icon <String>] [-PushIcon <Int32>] [-Repeat <Int32>]
+ [-DurationSeconds <Int32>] [-Hold] [-Sound <String>] [-Rtttl <String>] [-LoopSound] [-Stack] [-Wakeup]
+ [-Clients <String[]>] [-NoScroll] [-ScrollSpeed <Int32>] [-Effect <String>] [-EffectSettings <Hashtable>]
+ [-Bar <Int32[]>] [-Line <Int32[]>] [-Autoscale] [-BarBackgroundColor <Object>] [-Progress <Int32>]
+ [-ProgressColor <Object>] [-ProgressBackgroundColor <Object>] [-Draw <Array>] [-Overlay <String>] [-Send]
  [-BaseUri <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates or updates a custom app on the AWTRIX 3 device with text, icons, charts,
-progress bars, drawing instructions, and visual effects.
-The app is added to the
-display loop and can be updated by sending new data to the same app name.
+Returns an \[AwtrixNotification\] object that holds all properties of a one-time
+AWTRIX notification.
+Call .Send() when you're ready to dispatch it, or pass
+-Send to dispatch immediately.
+
+Storing the object lets you build reusable notification templates that can be
+cloned and customized without reconstructing every property each time.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Set-AwtrixApp -Name 'myapp' -Text 'Hello World' -Rainbow -Duration 10
+$alert = New-AwtrixNotification -Text 'Alert!' -Color Red -Sound 'alarm' -Hold
+PS> $alert.Send()
 ```
 
-Creates an app with rainbow text displayed for 10 seconds.
+Builds a reusable alert notification and sends it on demand.
 
 ### EXAMPLE 2
 ```
-Set-AwtrixApp -Name 'temp' -Text '72°F' -Icon 'temperature' -Color '#FF6600'
+$template = New-AwtrixNotification -Icon 'warning' -Color '#FF0000' -DurationSeconds 5
+PS> $disk  = $template.Clone(); $disk.Text  = 'Disk full!';    $disk.Send()
+PS> $net   = $template.Clone(); $net.Text   = 'Network down!'; $net.Send()
 ```
 
-Creates a temperature display app with an icon.
+Template pattern: clone a base notification, customize text, send.
 
 ### EXAMPLE 3
 ```
-Set-AwtrixApp -Name 'chart' -Bar @(1,5,3,8,2,6,4,7) -Color '#00FF00'
+New-AwtrixNotification -Text 'Done!' -Rainbow -Send
 ```
 
-Creates a bar chart app.
-
-### EXAMPLE 4
-```
-$drawings = @(
->>     New-AwtrixDrawing -Circle -X 28 -Y 4 -Radius 3 -Color '#FF0000'
->>     New-AwtrixDrawing -Text -X 0 -Y 0 -TextContent 'Hi' -Color '#00FF00'
->> )
-PS> Set-AwtrixApp -Name 'custom' -Draw $drawings
-```
-
-Creates an app with custom drawing instructions.
+Inline: create and immediately send.
 
 ## PARAMETERS
 
-### -Name
-The name of the custom app.
-Used to identify the app for updates or removal.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Text
 The text to display.
-Can be a simple string or an array of colored text fragment
-objects created by New-AwtrixTextFragment.
+A simple string or an array of colored fragment objects
+created by New-AwtrixTextFragment.
 
 ```yaml
 Type: Object
@@ -92,14 +71,13 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -TextCase
-Changes the uppercase setting.
 0 = global setting, 1 = force uppercase, 2 = show as sent.
 
 ```yaml
@@ -115,7 +93,7 @@ Accept wildcard characters: False
 ```
 
 ### -TopText
-Draw the text on top of the display.
+Draw text on top of the display.
 
 ```yaml
 Type: SwitchParameter
@@ -130,7 +108,7 @@ Accept wildcard characters: False
 ```
 
 ### -TextOffset
-Sets an offset for the x position of the starting text.
+X-axis offset for the starting text position.
 
 ```yaml
 Type: Int32
@@ -160,8 +138,8 @@ Accept wildcard characters: False
 ```
 
 ### -Color
-The text, bar, or line color.
-Accepts a hex string (e.g., '#FF0000') or RGB array (e.g., @(255, 0, 0)).
+Text, bar, or line color.
+Accepts a named color, hex string, or RGB array.
 
 ```yaml
 Type: Object
@@ -177,7 +155,6 @@ Accept wildcard characters: False
 
 ### -Gradient
 Colorizes text in a gradient of two colors.
-Supply an array of two color values.
 
 ```yaml
 Type: Array
@@ -192,7 +169,7 @@ Accept wildcard characters: False
 ```
 
 ### -BlinkTextMilliseconds
-Blinks the text at the given interval in milliseconds. Not compatible with gradient or rainbow.
+Blinks the text at the given interval in ms.
 
 ```yaml
 Type: Int32
@@ -207,7 +184,7 @@ Accept wildcard characters: False
 ```
 
 ### -FadeTextMilliseconds
-Fades the text on and off at the given interval in milliseconds. Not compatible with gradient or rainbow.
+Fades the text on and off at the given interval in ms.
 
 ```yaml
 Type: Int32
@@ -222,8 +199,7 @@ Accept wildcard characters: False
 ```
 
 ### -Background
-Sets a background color.
-Accepts a hex string or RGB array.
+Background color.
 
 ```yaml
 Type: Object
@@ -253,8 +229,7 @@ Accept wildcard characters: False
 ```
 
 ### -Icon
-The icon ID or filename (without extension) to display.
-Can also be a Base64-encoded 8x8 JPG.
+Icon ID, filename (without extension), or Base64-encoded 8x8 JPG.
 
 ```yaml
 Type: String
@@ -269,7 +244,7 @@ Accept wildcard characters: False
 ```
 
 ### -PushIcon
-Controls icon behavior: 0 = static, 1 = moves with text (once), 2 = moves with text (repeating).
+0 = static, 1 = moves with text once, 2 = moves with text repeatedly.
 
 ```yaml
 Type: Int32
@@ -284,8 +259,7 @@ Accept wildcard characters: False
 ```
 
 ### -Repeat
-Number of times the text scrolls before the app ends.
--1 for indefinite.
+Number of times the text scrolls before the notification ends.
 
 ```yaml
 Type: Int32
@@ -300,7 +274,7 @@ Accept wildcard characters: False
 ```
 
 ### -DurationSeconds
-How long the app is displayed in seconds.
+How long the notification is displayed in seconds.
 
 ```yaml
 Type: Int32
@@ -310,6 +284,113 @@ Aliases: DurationSec
 Required: False
 Position: Named
 Default value: 0
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Hold
+Keep the notification on screen until dismissed via the middle button or
+Clear-AwtrixNotification.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Sound
+RTTTL ringtone filename (no extension) from the MELODIES folder, or a
+4-digit DFplayer MP3 number.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Rtttl
+Inline RTTTL sound string played with the notification.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LoopSound
+Loop the sound or RTTTL for the duration of the notification.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Stack
+Stack this notification (true) or immediately replace the current one (false).
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Wakeup
+Wake the matrix if it is off for the duration of this notification.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Clients
+Additional AWTRIX device IP addresses to forward this notification to.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -330,7 +411,7 @@ Accept wildcard characters: False
 ```
 
 ### -ScrollSpeed
-Modifies scroll speed as a percentage of the original speed.
+Scroll speed as a percentage of the original speed.
 
 ```yaml
 Type: Int32
@@ -345,8 +426,7 @@ Accept wildcard characters: False
 ```
 
 ### -Effect
-Shows a background effect.
-Send empty string to remove an existing effect.
+Background effect name.
 
 ```yaml
 Type: String
@@ -361,7 +441,7 @@ Accept wildcard characters: False
 ```
 
 ### -EffectSettings
-A hashtable to change color and speed of the background effect.
+Hashtable to change color and speed of the background effect.
 
 ```yaml
 Type: Hashtable
@@ -376,8 +456,7 @@ Accept wildcard characters: False
 ```
 
 ### -Bar
-Draws a bar graph.
-Maximum 16 values without icon, 11 with icon.
+Bar chart data.
 
 ```yaml
 Type: Int32[]
@@ -392,8 +471,7 @@ Accept wildcard characters: False
 ```
 
 ### -Line
-Draws a line chart.
-Maximum 16 values without icon, 11 with icon.
+Line chart data.
 
 ```yaml
 Type: Int32[]
@@ -408,7 +486,7 @@ Accept wildcard characters: False
 ```
 
 ### -Autoscale
-Enables or disables autoscaling for bar and line charts.
+Auto-scale bar and line chart axes.
 
 ```yaml
 Type: SwitchParameter
@@ -423,8 +501,7 @@ Accept wildcard characters: False
 ```
 
 ### -BarBackgroundColor
-Background color of the bars.
-Accepts a hex string or RGB array.
+Background color of bar chart bars.
 
 ```yaml
 Type: Object
@@ -439,7 +516,7 @@ Accept wildcard characters: False
 ```
 
 ### -Progress
-Shows a progress bar with value 0-100.
+Progress bar value 0-100.
 
 ```yaml
 Type: Int32
@@ -454,8 +531,7 @@ Accept wildcard characters: False
 ```
 
 ### -ProgressColor
-The color of the progress bar.
-Accepts a hex string or RGB array.
+Progress bar foreground color.
 
 ```yaml
 Type: Object
@@ -470,8 +546,7 @@ Accept wildcard characters: False
 ```
 
 ### -ProgressBackgroundColor
-The background color of the progress bar.
-Accepts a hex string or RGB array.
+Progress bar background color.
 
 ```yaml
 Type: Object
@@ -487,7 +562,6 @@ Accept wildcard characters: False
 
 ### -Draw
 Array of drawing instruction objects.
-Use New-AwtrixDrawing to create them.
 
 ```yaml
 Type: Array
@@ -502,8 +576,7 @@ Accept wildcard characters: False
 ```
 
 ### -Overlay
-Sets an effect overlay.
-Options: clear, snow, rain, drizzle, storm, thunder, frost.
+Effect overlay: clear, snow, rain, drizzle, storm, thunder, frost.
 
 ```yaml
 Type: String
@@ -517,71 +590,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -LifetimeSeconds
-Removes the app if no update is received within this many seconds. 0 = disabled.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases: LifetimeSec
-
-Required: False
-Position: Named
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -LifetimeMode
-0 = delete the app when lifetime expires, 1 = mark as stale with red border.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Position
-Position of the app in the loop (0-based).
-Only applies on first push.
-Experimental.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: 0
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Save
-Saves the app to flash memory, persisting across reboots.
-Avoid for frequently updated apps.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -PassThru
-{{ Fill PassThru Description }}
+### -Send
+Dispatch the notification to the device immediately after creating the object.
 
 ```yaml
 Type: SwitchParameter
@@ -596,8 +606,8 @@ Accept wildcard characters: False
 ```
 
 ### -BaseUri
-The base URI of the AWTRIX device.
-If not specified, uses the connection from Connect-Awtrix.
+Base URI of the AWTRIX device.
+Overrides the module-level connection.
 
 ```yaml
 Type: String
@@ -633,6 +643,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### AwtrixNotification
 ## NOTES
 
 ## RELATED LINKS

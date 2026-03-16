@@ -1,110 +1,113 @@
-function Send-AwtrixNotification {
+function New-AwtrixNotification {
     <#
     .SYNOPSIS
-        Sends a one-time notification to the AWTRIX device.
+        Creates an AwtrixNotification object for deferred or reusable dispatch.
     .DESCRIPTION
-        Displays a one-time notification on the AWTRIX 3 device that interrupts the current
-        app loop. Supports the same visual options as custom apps, plus notification-specific
-        features like hold, sound, wake-up, stacking, and client forwarding.
+        Returns an [AwtrixNotification] object that holds all properties of a one-time
+        AWTRIX notification. Call .Send() when you're ready to dispatch it, or pass
+        -Send to dispatch immediately.
+
+        Storing the object lets you build reusable notification templates that can be
+        cloned and customized without reconstructing every property each time.
     .PARAMETER Text
-        The text to display. Can be a simple string or an array of colored text fragment
-        objects created by New-AwtrixTextFragment.
+        The text to display. A simple string or an array of colored fragment objects
+        created by New-AwtrixTextFragment.
     .PARAMETER TextCase
-        Changes the uppercase setting. 0 = global setting, 1 = force uppercase, 2 = show as sent.
+        0 = global setting, 1 = force uppercase, 2 = show as sent.
     .PARAMETER TopText
-        Draw the text on top of the display.
+        Draw text on top of the display.
     .PARAMETER TextOffset
-        Sets an offset for the x position of the starting text.
+        X-axis offset for the starting text position.
     .PARAMETER Center
         Centers a short, non-scrollable text.
     .PARAMETER Color
-        The text, bar, or line color. Accepts a named color (e.g., Red, Green, Blue),
-        a hex string, or an RGB array.
+        Text, bar, or line color. Accepts a named color, hex string, or RGB array.
     .PARAMETER Gradient
         Colorizes text in a gradient of two colors.
     .PARAMETER BlinkTextMilliseconds
-        Blinks the text at the given interval in milliseconds. Not compatible with gradient or rainbow.
+        Blinks the text at the given interval in ms.
     .PARAMETER FadeTextMilliseconds
-        Fades the text on and off at the given interval in milliseconds. Not compatible with gradient or rainbow.
+        Fades the text on and off at the given interval in ms.
     .PARAMETER Background
-        Sets a background color. Accepts a named color, hex string, or RGB array.
+        Background color.
     .PARAMETER Rainbow
         Fades each letter through the entire RGB spectrum.
     .PARAMETER Icon
-        The icon ID or filename (without extension) to display. Can also be a Base64-encoded 8x8 JPG.
+        Icon ID, filename (without extension), or Base64-encoded 8x8 JPG.
     .PARAMETER PushIcon
-        Controls icon behavior: 0 = static, 1 = moves with text (once), 2 = moves with text (repeating).
+        0 = static, 1 = moves with text once, 2 = moves with text repeatedly.
     .PARAMETER Repeat
         Number of times the text scrolls before the notification ends.
     .PARAMETER DurationSeconds
         How long the notification is displayed in seconds.
     .PARAMETER Hold
-        Holds the notification on top until dismissed via the middle button or Clear-AwtrixNotification.
+        Keep the notification on screen until dismissed via the middle button or
+        Clear-AwtrixNotification.
     .PARAMETER Sound
-        The filename of an RTTTL ringtone (without extension) from the MELODIES folder,
-        or the 4-digit number of an MP3 file for DFplayer.
+        RTTTL ringtone filename (no extension) from the MELODIES folder, or a
+        4-digit DFplayer MP3 number.
     .PARAMETER Rtttl
-        An RTTTL sound string to play inline with the notification.
+        Inline RTTTL sound string played with the notification.
     .PARAMETER LoopSound
-        Loops the sound or RTTTL as long as the notification is running.
+        Loop the sound or RTTTL for the duration of the notification.
     .PARAMETER Stack
-        If false, immediately replaces the current notification instead of stacking. Default is true.
+        Stack this notification (true) or immediately replace the current one (false).
     .PARAMETER Wakeup
-        Wakes up the matrix if it is off for the duration of the notification.
+        Wake the matrix if it is off for the duration of this notification.
     .PARAMETER Clients
-        Array of AWTRIX device IP addresses to forward this notification to.
+        Additional AWTRIX device IP addresses to forward this notification to.
     .PARAMETER NoScroll
         Disables text scrolling.
     .PARAMETER ScrollSpeed
-        Modifies scroll speed as a percentage of the original speed.
+        Scroll speed as a percentage of the original speed.
     .PARAMETER Effect
-        Shows a background effect.
+        Background effect name.
     .PARAMETER EffectSettings
-        A hashtable to change color and speed of the background effect.
+        Hashtable to change color and speed of the background effect.
     .PARAMETER Bar
-        Draws a bar graph. Maximum 16 values without icon, 11 with icon.
+        Bar chart data.
     .PARAMETER Line
-        Draws a line chart. Maximum 16 values without icon, 11 with icon.
+        Line chart data.
     .PARAMETER Autoscale
-        Enables or disables autoscaling for bar and line charts.
+        Auto-scale bar and line chart axes.
     .PARAMETER BarBackgroundColor
-        Background color of the bars. Accepts a named color, hex string, or RGB array.
+        Background color of bar chart bars.
     .PARAMETER Progress
-        Shows a progress bar with value 0-100.
+        Progress bar value 0–100.
     .PARAMETER ProgressColor
-        The color of the progress bar. Accepts a named color, hex string, or RGB array.
+        Progress bar foreground color.
     .PARAMETER ProgressBackgroundColor
-        The background color of the progress bar. Accepts a named color, hex string, or RGB array.
+        Progress bar background color.
     .PARAMETER Draw
-        Array of drawing instruction objects. Use New-AwtrixDrawing to create them.
+        Array of drawing instruction objects.
     .PARAMETER Overlay
-        Sets an effect overlay. Options: clear, snow, rain, drizzle, storm, thunder, frost.
-    .PARAMETER PassThru
-        Returns the [AwtrixNotification] object after sending. By default Send-AwtrixNotification produces no output.
+        Effect overlay: clear, snow, rain, drizzle, storm, thunder, frost.
+    .PARAMETER Send
+        Dispatch the notification to the device immediately after creating the object.
     .PARAMETER BaseUri
-        The base URI of the AWTRIX device. If not specified, uses the connection from Connect-Awtrix.
+        Base URI of the AWTRIX device. Overrides the module-level connection.
     .EXAMPLE
-        PS> Send-AwtrixNotification -Text 'Alert!' -Color '#FF0000' -Sound 'alarm'
+        PS> $alert = New-AwtrixNotification -Text 'Alert!' -Color Red -Sound 'alarm' -Hold
+        PS> $alert.Send()
 
-        Sends a red notification with an alarm sound.
+        Builds a reusable alert notification and sends it on demand.
     .EXAMPLE
-        PS> Send-AwtrixNotification -Text 'Important' -Hold -Icon 'warning'
+        PS> $template = New-AwtrixNotification -Icon 'warning' -Color '#FF0000' -DurationSeconds 5
+        PS> $disk  = $template.Clone(); $disk.Text  = 'Disk full!';    $disk.Send()
+        PS> $net   = $template.Clone(); $net.Text   = 'Network down!'; $net.Send()
 
-        Sends a held notification that stays until dismissed.
+        Template pattern: clone a base notification, customize text, send.
     .EXAMPLE
-        PS> Send-AwtrixNotification -Text 'Wake up!' -Wakeup -DurationSeconds 15
+        PS> New-AwtrixNotification -Text 'Done!' -Rainbow -Send
 
-        Sends a notification that wakes the display for 15 seconds.
-    .EXAMPLE
-        PS> $fragments = @(
-        >>     New-AwtrixTextFragment -Text 'Error: ' -Color 'FF0000'
-        >>     New-AwtrixTextFragment -Text 'disk full' -Color 'FFFFFF'
-        >> )
-        PS> Send-AwtrixNotification -Text $fragments -DurationSeconds 10
-
-        Sends a notification with colored text fragments.
+        Inline: create and immediately send.
     #>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        'PSReviewUnusedParameter', '',
+        Justification = 'Parameters are applied via PSBoundParameters loop'
+    )]
     [CmdletBinding()]
+    [OutputType([AwtrixNotification])]
     param(
         [Parameter(Position = 0)]
         $Text,
@@ -225,15 +228,15 @@ function Send-AwtrixNotification {
         [string]$Overlay,
 
         [Parameter()]
-    [switch]$PassThru,
+        [switch]$Send,
 
-    [Parameter()]
-    [string]$BaseUri
+        [Parameter()]
+        [string]$BaseUri
     )
 
     $notif = [AwtrixNotification]::new()
 
-    $skip = @('BaseUri', 'PassThru')
+    $skip = @('Send', 'BaseUri')
     $colorParams = @('Color', 'Gradient', 'Background', 'BarBackgroundColor', 'ProgressColor', 'ProgressBackgroundColor')
     foreach ($key in $PSBoundParameters.Keys) {
         if ($key -in $skip) { continue }
@@ -251,10 +254,9 @@ function Send-AwtrixNotification {
         $notif._baseUri = $BaseUri
     }
 
-    $notif.Send()
-
-    if ($PassThru) {
-        $notif
+    if ($Send) {
+        $notif.Send()
     }
-}
 
+    $notif
+}

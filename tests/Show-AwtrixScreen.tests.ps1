@@ -40,7 +40,7 @@ Describe 'Show-AwtrixScreen' -Skip:$script:SkipAll {
 
         It 'Throws when PwshSpectreConsole module is not installed' {
             Mock Get-Module { $null } -ModuleName awtrix -ParameterFilter {
-                $Name -eq 'PwshSpectreConsole' -and $ListAvailable
+                $Name -like 'PwshSpectreConsole*' -and $ListAvailable
             }
 
             { Show-AwtrixScreen -ScreenData $script:blackScreen } | Should -Throw '*PwshSpectreConsole*'
